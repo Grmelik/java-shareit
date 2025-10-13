@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final Map<Long, User> users = new HashMap<>();
     private static Long newId = 1L;
+    private final Map<Long, User> users = new HashMap<>();
 
     @Override
     public UserDto create(UserDto userDto) {
@@ -67,16 +67,19 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateUser(UserDto userDto) {
-        if (users.values().stream().anyMatch(user -> user.getEmail().equals(userDto.getEmail())))
+        if (users.values().stream().anyMatch(user -> user.getEmail().equals(userDto.getEmail()))) {
             throw new ValidationException("Такой email уже зарегистрирован.");
+        }
     }
 
     private void validateOldUser(User userOld, UserDto userDto) {
-        if (userOld == null)
+        if (userOld == null) {
             throw new NotFoundException("Пользователь не найден!");
+        }
         if (userOld.getEmail() != null && userDto.getEmail() != null) {
-            if (users.values().stream().anyMatch(user -> user.getEmail().equals(userDto.getEmail())))
+            if (users.values().stream().anyMatch(user -> user.getEmail().equals(userDto.getEmail()))) {
                 throw new ValidationException("Такой email уже зарегистрирован.");
+            }
         }
     }
 

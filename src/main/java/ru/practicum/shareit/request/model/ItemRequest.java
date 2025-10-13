@@ -12,5 +12,5 @@ public class ItemRequest {
     private Long id;
     private String description;
     private User requestor;
-    LocalDateTime created;
+    private LocalDateTime created;
 }

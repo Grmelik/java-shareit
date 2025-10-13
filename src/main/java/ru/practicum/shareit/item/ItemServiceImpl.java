@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -17,19 +18,17 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
-    private final Map<Long, Item> items = new HashMap<>();
     private static Long newId = 1L;
+    private final Map<Long, Item> items = new HashMap<>();
     private final UserService userService;
-
-    public ItemServiceImpl(UserService userService) {
-        this.userService = userService;
-    }
 
     @Override
     public ItemDto create(Long ownerId, ItemDto itemDto) {
-        if (userService.getUserById(ownerId) == null)
+        if (userService.getUserById(ownerId) == null) {
             throw new NotFoundException("Пользователь не найден.");
+        }
         Item item = ItemMapper.toItem(itemDto);
         item.setId(generateId());
         item.setOwnerId(ownerId);
@@ -50,9 +49,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto getItemById(Long id) {
         Item item = items.get(id);
-        if (item == null)
+        if (item == null) {
             throw new NotFoundException("Вещь не найдена.");
-
+        }
         return ItemMapper.toItemDto(item);
     }
 
@@ -69,8 +68,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void delete(Long id) {
-        if (id != null)
+        if (id != null) {
             items.remove(id);
+        }
     }
 
     @Override
@@ -101,10 +101,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void validateOldItem(Item itemOld, ItemDto itemDto, Long ownerId) {
-        if (itemOld == null)
+        if (itemOld == null) {
             throw new NotFoundException("Вещь не найдена");
-        if (!Objects.equals(itemOld.getOwnerId(), ownerId))
+        }
+        if (!Objects.equals(itemOld.getOwnerId(), ownerId)) {
             throw new ForbiddenException("Вещь может редактировать только собственник");
+        }
     }
 
     private long generateId() {
