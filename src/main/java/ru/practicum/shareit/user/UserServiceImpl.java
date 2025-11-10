@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -9,32 +10,26 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
-    private static Long newId = 1L;
-    private final Map<Long, User> users = new HashMap<>();
+    private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public UserDto create(UserDto userDto) {
         validateUser(userDto);
         User user = UserMapper.toUser(userDto);
-        user.setId(generateId());
-        users.put(user.getId(), user);
-        return UserMapper.toUserDto(user);
+        User userSaved = userRepository.save(user);
+        return UserMapper.toUserDto(userSaved);
     }
 
     @Override
     public Collection<UserDto> getAll() {
-        if (users.isEmpty()) {
-            throw new NotFoundException("Список пользователей пуст.");
-        }
-
-        return users.values()
+        return userRepository.findAll()
                 .stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
@@ -42,48 +37,42 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Long id) {
-        User user = users.get(id);
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден.");
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден."));
         return UserMapper.toUserDto(user);
     }
 
     @Override
+    @Transactional
     public UserDto update(Long id, UserDto userDto) {
-        User userOld = users.get(id);
-        validateOldUser(userOld, userDto);
-        userOld.setName(userDto.getName());
-        userOld.setEmail(userDto.getEmail());
+        User userOld = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден."));
+
+        if (userDto.getName() != null && !userDto.getName().isBlank()) {
+            userOld.setName(userDto.getName());
+        }
+
+        if (userOld.getEmail() != null && userDto.getEmail() != null) {
+            if (userRepository.findAll().stream().anyMatch(user -> user.getEmail().equals(userDto.getEmail()))) {
+                throw new ValidationException("Такой email уже зарегистрирован.");
+            }
+            userOld.setEmail(userDto.getEmail());
+        }
 
         return UserMapper.toUserDto(userOld);
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
-        if (id != null) {
-            users.remove(id);
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
         }
     }
 
     private void validateUser(UserDto userDto) {
-        if (users.values().stream().anyMatch(user -> user.getEmail().equals(userDto.getEmail()))) {
+        if (userRepository.findAll().stream().anyMatch(user -> user.getEmail().equals(userDto.getEmail()))) {
             throw new ValidationException("Такой email уже зарегистрирован.");
         }
-    }
-
-    private void validateOldUser(User userOld, UserDto userDto) {
-        if (userOld == null) {
-            throw new NotFoundException("Пользователь не найден!");
-        }
-        if (userOld.getEmail() != null && userDto.getEmail() != null) {
-            if (users.values().stream().anyMatch(user -> user.getEmail().equals(userDto.getEmail()))) {
-                throw new ValidationException("Такой email уже зарегистрирован.");
-            }
-        }
-    }
-
-    private long generateId() {
-        return newId++;
     }
 }
