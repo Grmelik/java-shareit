@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -156,16 +157,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void validateCreatingComment(Item item, User author) {
-        List<Booking> bookings = null;
-        bookings = bookingRepository.findByBookerIdAndItemIdAndStatus(author.getId(),
+        List<Booking> bookings = bookingRepository.findByBookerIdAndItemIdAndStatus(author.getId(),
                 item.getId(), BookingStatus.APPROVED);
         if (bookings.isEmpty()) {
             throw new ValidationException("Пользователь не бронировал эту вещь");
         }
 
-        boolean hasCompletedBooking = bookingRepository.existsByBookerIdAndItemIdAndStatusAndEndBefore(
-                author.getId(), item.getId(), BookingStatus.APPROVED, LocalDateTime.now());
-        if (!hasCompletedBooking) {
+        LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("Europe/Moscow"));
+        bookings = bookingRepository.findFinishedBookingsByUserAndItem(author.getId(),
+                item.getId(), BookingStatus.APPROVED, currentTime);
+        if (bookings.isEmpty()) {
             throw new ValidationException("Бронирование еще не завершено");
         }
     }

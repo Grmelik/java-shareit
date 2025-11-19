@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 
@@ -20,9 +19,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                AND b.end < :currentTime
              ORDER BY b.end DESC
             """)
-    Optional<Booking> findLastBooking(@Param("itemId") Long itemId,
-                                      @Param("currentTime") LocalDateTime currentTime,
-                                      @Param("status") BookingStatus status);
+    Optional<Booking> findLastBooking(Long itemId,
+                                      LocalDateTime currentTime,
+                                      BookingStatus status);
 
     @Query("""
             SELECT b FROM Booking b
@@ -31,9 +30,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                AND b.status = :status
              ORDER BY b.start ASC
             """)
-    Optional<Booking> findNextBooking(@Param("itemId") Long itemId,
-                                      @Param("currentTime") LocalDateTime currentTime,
-                                      @Param("status") BookingStatus status);
+    Optional<Booking> findNextBooking(Long itemId,
+                                      LocalDateTime currentTime,
+                                      BookingStatus status);
 
     @Query("""
             SELECT b FROM Booking b
@@ -41,9 +40,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                AND b.item.id = :itemId
                AND b.status = :status
             """)
-    List<Booking> findByBookerIdAndItemIdAndStatus(@Param("bookerId") Long bookerId,
-                                                   @Param("itemId") Long itemId,
-                                                   @Param("status") BookingStatus status);
+    List<Booking> findByBookerIdAndItemIdAndStatus(Long bookerId,
+                                                   Long itemId,
+                                                   BookingStatus status);
 
     @Query("""
             SELECT b FROM Booking b
@@ -52,10 +51,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                AND b.status = :status
                AND b.end < :currentTime
             """)
-    List<Booking> findFinishedBookingsByUserAndItem(@Param("bookerId") Long bookerId,
-                                                    @Param("itemId") Long itemId,
-                                                    @Param("status") BookingStatus status,
-                                                    @Param("currentTime") LocalDateTime currentTime);
+    List<Booking> findFinishedBookingsByUserAndItem(Long bookerId,
+                                                    Long itemId,
+                                                    BookingStatus status,
+                                                    LocalDateTime currentTime);
 
     Page<Booking> findByBookerId(Long bookerId, Pageable pageable);
 
