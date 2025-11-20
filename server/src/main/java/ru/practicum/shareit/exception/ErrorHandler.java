@@ -45,8 +45,15 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)     //400
+    public ErrorResponse handleValidation(final ValidationException e) {
+        log.error("Ошибка валидации: {}", e.getMessage());
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), System.currentTimeMillis());
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)   // 403
-    public ErrorResponse handleNotFound(final ForbiddenException e) {
+    public ErrorResponse handleForbidden(final ForbiddenException e) {
         log.error("Доступ запрещен: {}", e.getMessage());
         return new ErrorResponse(HttpStatus.FORBIDDEN.value(), e.getMessage(), System.currentTimeMillis());
     }
@@ -56,6 +63,13 @@ public class ErrorHandler {
     public ErrorResponse handleNotFound(final NotFoundException e) {
         log.error("Объект не найден: {}", e.getMessage());
         return new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage(), System.currentTimeMillis());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)   // 409
+    public ErrorResponse handleConflict(final ConflictException e) {
+        log.error("Обнаружен конфликт: {}", e.getMessage());
+        return new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage(), System.currentTimeMillis());
     }
 
     @ExceptionHandler

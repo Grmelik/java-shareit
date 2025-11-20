@@ -5,8 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.model.User;
 
 @Service
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
 
     private void validateCreatingUser(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new ValidationException("Такой email уже зарегистрирован.");
+            throw new ConflictException("Такой email уже зарегистрирован.");
         }
     }
 
@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
         if (userNew.getEmail() != null && userOld.getEmail() != null) {
             if (userRepository.findAll().stream()
                     .anyMatch(user -> userNew.getEmail().equals(userOld.getEmail()))) {
-                throw new ValidationException("Такой email уже зарегистрирован.");
+                throw new ConflictException("Такой email уже зарегистрирован.");
             }
             userOld.setEmail(userNew.getEmail());
         }
