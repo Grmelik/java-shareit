@@ -1,0 +1,37 @@
+server:
+  port: 9090
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  sql:
+    init:
+      mode: always
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/shareit
+    username: dbuser
+    password: 12345
+    hikari:
+      connection-timeout: 60000
+      validation-timeout: 5000
+
+logging:
+  level:
+    org:
+      springframework:
+        orm:
+          jpa: INFO
+        transaction:
+          interceptor: TRACE
+          jpa:
+            JpaTransactionManager: DEBUG
