@@ -161,7 +161,8 @@ public class ItemServiceImpl implements ItemService {
             throw new ValidationException("Пользователь не бронировал эту вещь");
         }
 
-        LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("Europe/Moscow"));
+        //LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("Europe/Moscow")); // It works for me, but it doesn't work for GH.
+        LocalDateTime currentTime = LocalDateTime.now();    // It doesn't work for me
         boolean hasFinishedBookings = bookingRepository
                 .existsByBookerIdAndItemIdAndStatusAndEndBefore(author.getId(), item.getId(),
                         BookingStatus.APPROVED, currentTime);
