@@ -163,8 +163,8 @@ public class ItemServiceImpl implements ItemService {
 
         LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("Europe/Moscow"));
         boolean hasFinishedBookings = bookingRepository
-                .existsByBookerIdAndItemIdAndStatusAndEndBefore(author.getId(),item.getId(),
-                        BookingStatus.APPROVED,currentTime);
+                .existsByBookerIdAndItemIdAndStatusAndEndBefore(author.getId(), item.getId(),
+                        BookingStatus.APPROVED, currentTime);
         if (!hasFinishedBookings) {
             throw new ValidationException("Бронирование еще не завершено");
         }
