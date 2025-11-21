@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Builder
 public class CommentDto {
     private Long id;
-    @NotBlank(message = "Надо оставить комментарий")
     private String text;
     private Long itemId;
     private Long authorId;

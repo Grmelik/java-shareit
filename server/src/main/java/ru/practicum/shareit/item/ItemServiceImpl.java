@@ -24,7 +24,6 @@ import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.model.User;
 
@@ -38,7 +37,6 @@ public class ItemServiceImpl implements ItemService {
     private final FacadeService facadeService;
     private final ItemMapper itemMapper;
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
     private final UserService userService;
 
     @Override
@@ -164,9 +162,10 @@ public class ItemServiceImpl implements ItemService {
         }
 
         LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("Europe/Moscow"));
-        bookings = bookingRepository.findFinishedBookingsByUserAndItem(author.getId(),
-                item.getId(), BookingStatus.APPROVED, currentTime);
-        if (bookings.isEmpty()) {
+        boolean hasFinishedBookings = bookingRepository
+                .existsByBookerIdAndItemIdAndStatusAndEndBefore(author.getId(),item.getId(),
+                        BookingStatus.APPROVED,currentTime);
+        if (!hasFinishedBookings) {
             throw new ValidationException("Бронирование еще не завершено");
         }
     }
